@@ -7,54 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Presence Pusher</title>
   <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
-  <script>
-
-    // Enable pusher logging - don't include this in production
-    Pusher.logToConsole = true;
-
-    var url = new URL(window.location);
-    var nome = url.searchParams.get("nome");
-
-    var pusher = new Pusher('45967fe02c9c0a0ef871', {
-      cluster: 'us2',
-      authEndpoint: "http://localhost:5000/pusher/auth/?nome=" + nome,
-      auth: { headers: { "X-CSRF-Token": "SOME_CSRF_TOKEN" } }
-    });
-
-    var channel = pusher.subscribe("presence-channel");
-
-    var onlines = []
-
-    channel.bind("pusher:subscription_succeeded", function () {
-      channel.members.each(function (member) {
-        onlines.push({ id: parseInt(member.id), nome: member.info.nome })
-      })
-      var arr = onlines.filter((este, i) => onlines.indexOf(este) === i);
-      onlines = arr
-      console.log("usuarios: ", onlines)
-      setOnlines()
-    });
-
-    channel.bind("pusher:member_added", (member) => {
-      // console.log("membro: ", member.id, " adicionado!")
-      onlines.push({ id: parseInt(member.id), nome: member.info.nome })
-      var arr = onlines.filter((este, i) => onlines.indexOf(este) === i);
-      onlines = arr
-      console.log("usuarios: ", onlines)
-      setOnlines()
-    });
-
-    channel.bind("pusher:member_removed", (member) => {
-      // console.log("membro: ", member.id, " removido!")
-      var index = onlines.findIndex(user => user.id == member.id)
-      if (index != -1) {
-        onlines.splice(index, 1)
-      }
-      console.log("usuarios: ", onlines)
-      setOnlines()
-    });
-
-  </script>
+  <script src="pusher.js"></script>
 </head>
 
 <body>
@@ -64,9 +17,8 @@
 
   <script>
     function setOnlines() {
-      setTimeout(() => {
-        document.querySelector('.onlines').innerHTML = onlines.map(u => `<p>${u.nome}</p>` ).join('')
-      }, 5000)
+      document.querySelector('.onlines').innerHTML = onlines.map(u => `<p>${u.nome} - ${u.id}</p>`).join('')
+      console.log("usuarios online: ", onlines)
     }
   </script>
 </body>
